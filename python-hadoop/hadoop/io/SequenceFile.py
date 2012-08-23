@@ -22,6 +22,7 @@ from time import time
 import os
 
 from hadoop.util.ReflectionUtils import hadoopClassFromName, hadoopClassName
+from hadoop.io.VersionMismatchException import VersionMismatchException
 
 from compress import CodecPool
 
