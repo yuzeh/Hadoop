@@ -54,12 +54,19 @@ class ByteArrayInputStream(InputStream):
     def toByteArray(self):
         return self._buffer[self._offset:self._offset+self._count]
 
+    def getPos(self):
+        return self._offset
+
+    def length(self):
+        return self._length
+
     def reset(self, data, offset=0, length=0):
         if data and not length:
             length = len(data) - offset
         self._buffer = data
         self._offset = offset
         self._count = length
+        self._length = len(data)
 
     def close(self):
         pass
