@@ -270,21 +270,10 @@ class Writer(object):
         if self._stream.getPos() >= (self._last_sync + SYNC_INTERVAL):
             self.sync()
 
-class Reader(object):
-    def __init__(self, path, start=0, length=0):
-        self._block_compressed = False
-        self._decompress = False
-        self._sync_seen = False
-
-        self._value_class = None
-        self._key_class = None
-        self._codec = None
-
-        self._metadata = None
-
-        self._record = DataInputBuffer()
-
-        self._initialize(path, start, length)
+class BaseReader(object):
+    def __init__(self, input_stream, start=0, length=0):
+        self._initialize_members()
+        self._initialize(input_stream, start, length)
 
     def close(self):
         self._stream.close()
@@ -430,8 +419,21 @@ class Reader(object):
     def syncSeen(self):
         return self._sync_seen
 
-    def _initialize(self, path, start, length):
-        self._stream = DataInputStream(FileInputStream(path))
+    def _initialize_members(self):
+        self._block_compressed = False
+        self._decompress = False
+        self._sync_seen = False
+
+        self._value_class = None
+        self._key_class = None
+        self._codec = None
+
+        self._metadata = None
+
+        self._record = DataInputBuffer()
+
+    def _initialize(self, input_stream, start, length):
+        self._stream = DataInputStream(input_stream)
 
         if length == 0:
             self._end = self._stream.getPos() + self._stream.length()
@@ -503,3 +505,11 @@ class Reader(object):
         value.readFields(stream)
         if not self._block_compressed:
             assert self._record.size() == 0
+
+class Reader(BaseReader):
+    def __init__(self, path, start=0, length=0):
+        super(Reader, self).__init__(FileInputStream(path), start, length)
+
+class ByteArrayReader(BaseReader):
+    def __init__(self, byte_array, start=0, length=0):
+        super(ByteArrayReader, self).__init__(ByteArrayInputStream(byte_array), start, length)
